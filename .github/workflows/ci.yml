@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - 'CHANGELOG.md'
+  push:
+    branches:
+      - main
+      - master
+      - develop
+    paths-ignore:
+      - 'README.md'
+      - 'CHANGELOG.md'
+
+env:
+  CARGO_TERM_COLOR: always
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  skip-check:
+    name: skip release commits
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          fetch-depth: 1
+      - name: Check commit message
+        id: check
+        run: |
+          msg="$(git log -1 --format='%s')"
+          if [[ "$msg" == release* ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+  fmt:
+    name: fmt
+    needs: skip-check
+    if: needs.skip-check.outputs.skip == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt
+      - name: check formatting
+        run: cargo +nightly fmt -- --check
+      - name: Cache Cargo dependencies
+        uses: Swatinem/rust-cache@v2
+  clippy:
+    name: clippy
+    needs: skip-check
+    if: needs.skip-check.outputs.skip == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Install Linux audio dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libasound2-dev
+      - name: Run clippy action
+        uses: clechasseur/rs-clippy-check@v5
+      - name: Cache Cargo dependencies
+        uses: Swatinem/rust-cache@v2
+  build-aarch64:
+    name: build linux/aarch64
+    needs: skip-check
+    if: needs.skip-check.outputs.skip == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup Cargo Env
+        run: |
+          mkdir -p .cargo
+          cat <<EOF >> .cargo/config.toml
+          [env]
+          PKG_CONFIG_ALLOW_CROSS = "1"
+          PKG_CONFIG_PATH = "/usr/lib/aarch64-linux-gnu/pkgconfig"
+          EOF
+
+      - name: Build for aarch64-unknown-linux-gnu
+        uses: houseabsolute/actions-rust-cross@v1
+        with:
+          target: aarch64-unknown-linux-gnu
+          command: build
+          args: '--locked'
+      - name: Cache Cargo dependencies
+        uses: Swatinem/rust-cache@v2
+  test:
+    needs: skip-check
+    if: needs.skip-check.outputs.skip == 'false'
+    runs-on: ${{ matrix.os }}
+    name: test ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: cargo generate-lockfile
+        if: hashFiles('Cargo.lock') == ''
+        run: cargo generate-lockfile
+      - name: cargo test --locked
+        run: cargo test --locked --all-features
+      - name: Cache Cargo dependencies
+        uses: Swatinem/rust-cache@v2

@@ -1,0 +1,43 @@
+[package]
+name = "y7dl"
+version = "0.1.1"
+edition = "2024"
+description = "Rust port of kkdai/youtube: extract video info and download streams"
+readme = "README.md"
+repository = "https://github.com/erwin-lovecraft/y7dl"
+license = "MIT"
+keywords = ["download", "innertube", "video", "youtube"]
+categories = ["api-bindings", "multimedia::video"]
+
+[[bin]]
+name = "y7dl"
+required-features = ["cli"]
+
+[[example]]
+name = "search_to_json"
+required-features = ["cli"]
+
+[dependencies]
+reqwest = {
+  version = "0.13.4",
+  default-features = false,
+  features = ["json", "query", "rustls-no-provider"]
+}
+rustls = {
+  version = "0.23.43",
+  default-features = false,
+  features = [
+    "ring",
+    "std",
+  ]
+}
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+tokio = { version = "1.53.1", features = ["fs", "io-util", "sync"] }
+
+[dev-dependencies]
+tokio = { version = "1.53.1", features = ["macros", "rt"] }
+
+[features]
+default = ["cli"]
+cli = ["tokio/macros", "tokio/rt-multi-thread"]

@@ -1,0 +1,261 @@
+use ratatui::{
+    Frame,
+    layout::Rect,
+    style::{Color, Modifier, Style},
+    text::{Line, Span},
+    widgets::{List, ListItem, Paragraph},
+};
+use unicode_width::UnicodeWidthStr;
+
+use super::BlockStyle;
+use crate::{
+    state::NavState,
+    ui::{block::CornerBlock, styled_text},
+};
+
+pub(super) fn draw(
+    f: &mut Frame,
+    nav: &mut NavState,
+    bs: &BlockStyle<'_>,
+    title: &str,
+    area: Rect,
+) {
+    let colors = bs.colors;
+    let muted_style = Style::default().fg(colors.muted);
+    let block = CornerBlock::from_color(bs, bs.colors.bg).title(title, bs.colors);
+    let inner = block.inner(area);
+    f.render_widget(block, area);
+
+    if nav.sections.is_empty() {
+        return;
+    }
+
+    let total_rows: usize = nav.sections.iter().map(|s| s.items.len() + 1).sum();
+    let mut list_items = Vec::with_capacity(total_rows);
+
+    let mut global_selected_idx = None;
+    let mut current_global_row = 0;
+
+    for (i, section) in nav.sections.iter().enumerate() {
+        let focused = i == nav.focus_section;
+
+        let title_spans = styled_text::parse_styled(&section.title, colors);
+        list_items.push(ListItem::new(Line::from(title_spans)));
+        current_global_row += 1;
+
+        let state = &nav.section_states[i];
+        for (idx, item) in section.items.iter().enumerate() {
+            let is_selected = state.selected() == Some(idx);
+
+            if is_selected && focused {
+                global_selected_idx = Some(current_global_row);
+            }
+
+            let name_spans = styled_text::parse_styled(&item.name, colors);
+
+            let line = if is_selected && focused {
+                let capsule = Style::default()
+                    .bg(colors.accent)
+                    .fg(Color::Rgb(68, 71, 90))
+                    .add_modifier(Modifier::BOLD);
+                let name_width: usize = name_spans
+                    .iter()
+                    .map(|s| UnicodeWidthStr::width(&*s.content))
+                    .sum();
+                let padding_len = (inner.width as usize).saturating_sub(2 + name_width);
+                let mut line = Line::default();
+                line.push_span(Span::styled(" ", capsule));
+                for s in name_spans {
+                    line.push_span(Span::styled(s.content, capsule));
+                }
+                line.push_span(Span::styled(" ".repeat(padding_len), capsule));
+                line
+            } else {
+                let mut line = Line::default();
+                line.push_span(Span::styled("  ", Style::default().fg(colors.muted)));
+                for s in name_spans {
+                    line.push_span(Span::styled(s.content, muted_style.patch(s.style)));
+                }
+                line
+            };
+
+            list_items.push(ListItem::new(line));
+            current_global_row += 1;
+        }
+    }
+
+    let list = List::new(list_items);
+    let mut global_state =
+        ratatui::widgets::ListState::default().with_selected(global_selected_idx);
+
+    f.render_stateful_widget(list, inner, &mut global_state);
+}
+
+/// Top/bottom navigation mode: all items across sections are laid out in a single row, the
+/// selected item is highlighted with the accent background plus side join characters, and when
+/// too wide it scrolls horizontally per `NavState::scroll_x` so the selected item stays
+/// visible.
+pub(super) fn draw_top(f: &mut Frame, nav: &mut NavState, bs: &BlockStyle<'_>, area: Rect) {
+    let colors = bs.colors;
+    let muted_style = Style::default().fg(colors.muted);
+    let block = CornerBlock::from_color(bs, bs.colors.surface);
+    let inner = block.inner(area);
+    f.render_widget(block, area);
+
+    let viewport = inner.width as usize;
+
+    let mut line = Line::default();
+    let mut total = 0usize;
+    let mut selected_start = None;
+    let mut selected_width = 0usize;
+
+    for (si, section) in nav.sections.iter().enumerate() {
+        for (ii, item) in section.items.iter().enumerate() {
+            let is_selected =
+                nav.focus_section == si && nav.section_states[si].selected() == Some(ii);
+
+            if !line.spans.is_empty() {
+                line.push_span(Span::styled("  ", Style::default()));
+                total += 2;
+            }
+
+            let name_spans = styled_text::parse_styled(&item.name, colors);
+            let width: usize = name_spans
+                .iter()
+                .map(|s| UnicodeWidthStr::width(&*s.content))
+                .sum();
+
+            if is_selected {
+                let capsule = Style::default()
+                    .bg(colors.accent)
+                    .fg(Color::Rgb(68, 71, 90))
+                    .add_modifier(Modifier::BOLD);
+                selected_start = Some(total);
+                selected_width = width + 4;
+                line.push_span(Span::styled("  ", capsule));
+            }
+
+            for s in name_spans {
+                let style = if is_selected {
+                    s.style
+                        .bg(colors.accent)
+                        .fg(Color::Rgb(68, 71, 90))
+                        .add_modifier(Modifier::BOLD)
+                } else {
+                    muted_style.patch(s.style)
+                };
+                line.push_span(Span::styled(s.content, style));
+            }
+            if is_selected {
+                let capsule = Style::default()
+                    .bg(colors.accent)
+                    .fg(Color::Rgb(68, 71, 90))
+                    .add_modifier(Modifier::BOLD);
+                line.push_span(Span::styled("  ", capsule));
+            }
+            total += width + if is_selected { 4 } else { 0 };
+        }
+    }
+
+    let max_scroll = total.saturating_sub(viewport);
+    if let Some(start) = selected_start {
+        nav.scroll_x = keep_visible(
+            nav.scroll_x as usize,
+            start,
+            selected_width,
+            viewport,
+            max_scroll,
+        ) as u16;
+    } else {
+        nav.scroll_x = nav.scroll_x.min(max_scroll as u16);
+    }
+
+    // 有足够空间时让整行导航项水平居中（空间不足时保持原滚动逻辑）
+    if total < viewport {
+        let pad = (viewport - total) / 2;
+        if pad > 0 {
+            line.spans
+                .insert(0, Span::styled(" ".repeat(pad), Style::default()));
+        }
+    }
+
+    f.render_widget(Paragraph::new(line).scroll((0, nav.scroll_x)), inner);
+}
+
+/// Compute the horizontal scroll offset so the selected item `[start, start+width)` is visible
+/// within `viewport`, keeping the current scroll position stable whenever possible (only
+/// scrolling when the selection goes out of bounds).
+pub(super) fn keep_visible(
+    scroll: usize,
+    start: usize,
+    width: usize,
+    viewport: usize,
+    max_scroll: usize,
+) -> usize {
+    if viewport == 0 {
+        return 0;
+    }
+    let mut s = if start < scroll { start } else { scroll };
+    if start + width > s + viewport {
+        s = start + width - viewport;
+    }
+    s.min(max_scroll)
+}
+
+#[cfg(test)]
+mod tests {
+    use ratatui::style::Style;
+
+    use super::{keep_visible, styled_text};
+    use crate::config::Theme;
+
+    #[test]
+    fn unselected_item_tag_wins_over_muted_default() {
+        let theme = Theme::default();
+        let muted_style = Style::default().fg(theme.muted);
+        let name_spans =
+            styled_text::parse_styled_with("<accent>歌单</accent>", &theme, Style::default());
+        // unselected items use patch() so an explicit color tag survives
+        let fg = muted_style.patch(name_spans[0].style).fg;
+        assert_eq!(fg, Some(theme.accent));
+    }
+
+    #[test]
+    fn unselected_plain_item_falls_back_to_muted() {
+        let theme = Theme::default();
+        let muted_style = Style::default().fg(theme.muted);
+        let name_spans = styled_text::parse_styled_with("歌单", &theme, Style::default());
+        let fg = muted_style.patch(name_spans[0].style).fg;
+        assert_eq!(fg, Some(theme.muted));
+    }
+
+    #[test]
+    fn content_fits_viewport_no_scroll() {
+        assert_eq!(keep_visible(0, 5, 4, 40, 0), 0);
+    }
+
+    #[test]
+    fn selected_beyond_right_edge_scrolls_forward() {
+        assert_eq!(keep_visible(0, 30, 4, 20, 100), 14);
+    }
+
+    #[test]
+    fn selected_before_scroll_scrolls_back() {
+        assert_eq!(keep_visible(40, 5, 4, 20, 100), 5);
+    }
+
+    #[test]
+    fn clamps_to_max_scroll() {
+        assert_eq!(keep_visible(0, 90, 4, 20, 80), 74);
+    }
+
+    #[test]
+    fn already_visible_keeps_position() {
+        assert_eq!(keep_visible(10, 12, 4, 20, 100), 10);
+    }
+
+    #[test]
+    fn zero_viewport() {
+        assert_eq!(keep_visible(5, 5, 4, 0, 100), 0);
+    }
+}
