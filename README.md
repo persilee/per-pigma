@@ -6,7 +6,6 @@
 [![AUR Version](https://img.shields.io/aur/version/pigma-bin)](https://aur.archlinux.org/packages/pigma-bin)
 ![GitHub repo size](https://img.shields.io/github/repo-size/akirco/pigma)
 
-
 <img width="100" src="./imgs/logo.png" alt="pigma" />
 
 A NetEase Cloud Music (网易云音乐) or local audio playback TUI client built with [Ratatui](https://ratatui.rs).
@@ -45,7 +44,6 @@ A NetEase Cloud Music (网易云音乐) or local audio playback TUI client built
   - [License](#license)
 
 </details>
-
 
 **注意：**
 
@@ -97,8 +95,6 @@ A NetEase Cloud Music (网易云音乐) or local audio playback TUI client built
 
 ## Preview
 
-
-
 <table>
   <tr>
     <td><img src="./imgs/image_001.png" width="100%" /></td>
@@ -108,16 +104,16 @@ A NetEase Cloud Music (网易云音乐) or local audio playback TUI client built
     <td><img src="./imgs/image_003.png" width="100%" /></td>
     <td><img src="./imgs/image_005.png" width="100%" /></td>
   </tr>
+  <tr>
+    <td><img src="./imgs/image_006.png" width="100%" /></td>
+    </tr>
 </table>
-
 
 ## Install
 
 > Note: the `gnu` Linux builds depend on system audio libraries (e.g. `alsa-lib`).
 
 ### From releases
-
-
 
 ```sh
 # https://github.com/marcosnils/bin
@@ -132,6 +128,7 @@ scoop install aki/pigma
 ```
 
 `linux(aur)`
+
 ```sh
 yay -S pigma
 
@@ -164,7 +161,6 @@ cargo build --release
 
 ## Usage
 
-
 | 快捷键        |                     描述                     |
 | :------------ | :------------------------------------------: |
 | w             |                 清空播放队列                 |
@@ -181,7 +177,7 @@ cargo build --release
 | left /right   |                   seek 15s                   |
 | p /n          |                上一首/下一首                 |
 | ctrl+p        |                command panel                 |
-| L             |               登录网易云                     |
+| L             |                  登录网易云                  |
 | c             |  切换表格为cell/row模式(回车进入歌手/专辑)   |
 | m             | 切换播放模式（适用于我的歌单或我喜欢的音乐） |
 | u             |  上传`本地音乐`或`下载管理`的音频到音乐云盘  |
@@ -209,22 +205,22 @@ Add-Content $PROFILE '. "$HOME/.config/powershell/pigma.ps1"'
 
 ```
 
-| 命令 | 说明 |
-|---|---|
-| `pigma status` | 查询状态（默认 plain 文本） |
-| `pigma status --json` | 以 JSON 输出 |
-| `pigma status -L` | 列出当前队列（`>` 标记当前曲目，末列是歌曲 `id`，可直接配 `pigma msg play <id>`），`-L --json` 输出原始 `QueueSnapshot`（含队列 `key`） |
-| `pigma status --template "{name}  {artist}  {current}/{duration}  {status}  vol {volume}%"` | 自定义 plain 输出模板 |
-| `pigma msg next` / `pigma msg previous` | 下一首 / 上一首 |
-| `pigma msg pause` / `pigma msg play` | 暂停 / 播放（`pigma msg play <song-id>` 按 id 跳播队列中的歌曲） |
-| `pigma msg search <keyword>` | 搜索并返回歌曲数据（NCM + 已启用 sonar 源，标出 `source` 和 `id`），再 `pigma msg play <id>` 播放选中的那首 |
-| `pigma msg toggle_play` | 播放/暂停切换 |
-| `pigma msg mode` | 切换播放模式 |
-| `pigma msg like` / `pigma msg dislike` | 喜欢 / 不喜欢 |
-| `pigma msg toggle_like` | 喜欢/取消喜欢（切换当前曲目） |
-| `pigma msg switch-list <endpoint>` | 动态切换守护进程的队列到指定端点（如 `recommend_songs`、`toplist`），歌单端点可用 `--playlist N` 选第 N 个 |
-| `pigma msg volume 75` | 绝对音量（0-100） |
-| `pigma msg volume +5` / `-10` | 相对 ±%（与 TUI 的 `+` / `-` 一致，支持负数） |
+| 命令                                                                                        | 说明                                                                                                                                    |
+| ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `pigma status`                                                                              | 查询状态（默认 plain 文本）                                                                                                             |
+| `pigma status --json`                                                                       | 以 JSON 输出                                                                                                                            |
+| `pigma status -L`                                                                           | 列出当前队列（`>` 标记当前曲目，末列是歌曲 `id`，可直接配 `pigma msg play <id>`），`-L --json` 输出原始 `QueueSnapshot`（含队列 `key`） |
+| `pigma status --template "{name}  {artist}  {current}/{duration}  {status}  vol {volume}%"` | 自定义 plain 输出模板                                                                                                                   |
+| `pigma msg next` / `pigma msg previous`                                                     | 下一首 / 上一首                                                                                                                         |
+| `pigma msg pause` / `pigma msg play`                                                        | 暂停 / 播放（`pigma msg play <song-id>` 按 id 跳播队列中的歌曲）                                                                        |
+| `pigma msg search <keyword>`                                                                | 搜索并返回歌曲数据（NCM + 已启用 sonar 源，标出 `source` 和 `id`），再 `pigma msg play <id>` 播放选中的那首                             |
+| `pigma msg toggle_play`                                                                     | 播放/暂停切换                                                                                                                           |
+| `pigma msg mode`                                                                            | 切换播放模式                                                                                                                            |
+| `pigma msg like` / `pigma msg dislike`                                                      | 喜欢 / 不喜欢                                                                                                                           |
+| `pigma msg toggle_like`                                                                     | 喜欢/取消喜欢（切换当前曲目）                                                                                                           |
+| `pigma msg switch-list <endpoint>`                                                          | 动态切换守护进程的队列到指定端点（如 `recommend_songs`、`toplist`），歌单端点可用 `--playlist N` 选第 N 个                              |
+| `pigma msg volume 75`                                                                       | 绝对音量（0-100）                                                                                                                       |
+| `pigma msg volume +5` / `-10`                                                               | 相对 ±%（与 TUI 的 `+` / `-` 一致，支持负数）                                                                                           |
 
 `pigma status` 的 `--template` 支持占位符：`{name}` `{artist}` `{album}` `{current}`/`{position}`
 `{duration}` `{volume}` `{status}` `{mode}` `{id}` `{liked}`。
@@ -232,7 +228,6 @@ Add-Content $PROFILE '. "$HOME/.config/powershell/pigma.ps1"'
 `cli_status_format`（见 [config.example.toml](./config.example.toml)）。
 
 #### 直接走 Unix socket（socat / 脚本）
-
 
 > **仅 Linux/macOS**：`status` / `msg` 子命令底层就是往 `~/.cache/pigma/pigma.sock`
 > 发一行 JSON。Windows 用的是命名管道，见下节。
@@ -292,33 +287,33 @@ Send-Pigma '{"cmd":"msg","action":{"action":"volume","absolute":0.75}}'  # 音�
 
 以无终端方式后台运行（可挂在 waybar / systemd 下），加载指定的 API 作为初始队列（**不自动播放**，用 `pigma msg play` 或 waybar 的 toggle 按钮开始）。
 
-| 选项 | 说明 |
-|---|---|
-| `pigma -d` | 等价于 `pigma -d liked` |
-| `pigma -d toplist` | 加载指定端点 |
-| `pigma --daemon user_cloud_disk` | `-d` 的全写形式 |
-| `pigma -d toplist:3` | 歌单/榜单端点用 `:N` 选第 N 个（1 起始） |
+| 选项                             | 说明                                     |
+| -------------------------------- | ---------------------------------------- |
+| `pigma -d`                       | 等价于 `pigma -d liked`                  |
+| `pigma -d toplist`               | 加载指定端点                             |
+| `pigma --daemon user_cloud_disk` | `-d` 的全写形式                          |
+| `pigma -d toplist:3`             | 歌单/榜单端点用 `:N` 选第 N 个（1 起始） |
 
 支持的内置 API 与导航项一致：
 
-| 端点 | 类型 | 说明 |
-|---|---|---|
-| `liked` | 歌曲（默认） | 我喜欢的音乐，需登录 |
-| `recommend_songs` | 歌曲 | 每日推荐歌曲 |
-| `user_cloud_disk` | 歌曲 | 我的云盘 |
-| `download` | 歌曲 | 本地下载 |
-| `local_music` | 歌曲 | 本地音乐 |
-| `recent` | 歌曲 | 最近播放 |
-| `recommend_resource` | 歌单 | 每日推荐歌单 |
-| `toplist` | 歌单 | 排行榜 |
-| `top_song_list` | 歌单 | 热门歌单 |
-| `user_radio_sublist` | 歌单 | 我的电台 |
-| `user_song_list` | 歌单 | 用户歌单 |
-| `user_created_song_list` | 歌单 | 创建的歌单 |
-| `user_subscribed_song_list` | 歌单 | 订阅的歌单 |
-| `album_sublist` | 歌单 | 收藏的专辑 |
-| `search` | 其他 | 搜索热榜（无可播队列） |
-| `top_singers` | 其他 | 热门歌手（无可播队列） |
+| 端点                        | 类型         | 说明                   |
+| --------------------------- | ------------ | ---------------------- |
+| `liked`                     | 歌曲（默认） | 我喜欢的音乐，需登录   |
+| `recommend_songs`           | 歌曲         | 每日推荐歌曲           |
+| `user_cloud_disk`           | 歌曲         | 我的云盘               |
+| `download`                  | 歌曲         | 本地下载               |
+| `local_music`               | 歌曲         | 本地音乐               |
+| `recent`                    | 歌曲         | 最近播放               |
+| `recommend_resource`        | 歌单         | 每日推荐歌单           |
+| `toplist`                   | 歌单         | 排行榜                 |
+| `top_song_list`             | 歌单         | 热门歌单               |
+| `user_radio_sublist`        | 歌单         | 我的电台               |
+| `user_song_list`            | 歌单         | 用户歌单               |
+| `user_created_song_list`    | 歌单         | 创建的歌单             |
+| `user_subscribed_song_list` | 歌单         | 订阅的歌单             |
+| `album_sublist`             | 歌单         | 收藏的专辑             |
+| `search`                    | 其他         | 搜索热榜（无可播队列） |
+| `top_singers`               | 其他         | 热门歌手（无可播队列） |
 
 歌单类端点解析出来是一组歌单，默认加载第一个；`-d` 可用 `ENDPOINT:N`（如 `pigma -d toplist:3`）选择第 N 个（1 起始），`msg switch-list` 可用 `--playlist N`。序号与 TUI 中列表显示的顺序一致，可先在 TUI 里查看：
 
@@ -326,7 +321,7 @@ Send-Pigma '{"cmd":"msg","action":{"action":"volume","absolute":0.75}}'  # 音�
 
 **Waybar 集成**：
 
-  - 参考[waybar](./waybar)。状态模块用 bash 脚本 `waybar/pigma`，每秒调 `pigma status --json` 获取状态并格式化为 waybar JSON。脚本内置 `ensure_daemon`，首次调用时自动启动 daemon。
+- 参考[waybar](./waybar)。状态模块用 bash 脚本 `waybar/pigma`，每秒调 `pigma status --json` 获取状态并格式化为 waybar JSON。脚本内置 `ensure_daemon`，首次调用时自动启动 daemon。
 
 ```jsonc
 // ~/.config/waybar/config.jsonc 核心片段
@@ -341,6 +336,7 @@ Send-Pigma '{"cmd":"msg","action":{"action":"volume","absolute":0.75}}'  # 音�
 ```
 
 ## Configuration
+
 Config file location:
 
 - linux: `~/.config/pigma/config.toml`
@@ -350,7 +346,6 @@ Config file location:
 ### Columns Configuration
 
 Each content type has two levels of columns: **type-defaults** and **per-API overrides**.
-
 
 ```toml
 [columns]
@@ -374,7 +369,6 @@ search = [
     { header = "HOT SEARCH", field = "keyword", min_width = 1 },
 ]
 ```
-
 
 #### Column width types
 
@@ -582,27 +576,26 @@ are styled by the active theme:
 | `<accent>…</accent>` | Accent color |
 | `<b>…</b>`           | Bold         |
 
-
 **支持的标记语法**
 
 > 标记语法不限于导航列表，表格 block title、表格标题等均支持。
 
-| 类型 | 标签 | 含义 | 写法示例 |
-| --- | --- | --- | --- |
-| 主题色 | `<accent>` | 主题强调色 | `<accent>►</accent>` |
-| 主题色 | `<text>` | 主题正文色 | `<text>…</text>` |
-| 主题色 | `<muted>` | 主题弱化色 | `<muted>…</muted>` |
-| 主题色 | `<error>` | 主题错误色 | `<error>…</error>` |
-| 主题色 | `<bg>` | 主题背景色 | `<bg>…</bg>` |
-| 主题色 | `<surface>` | 主题面板色 | `<surface>…</surface>` |
-| 主题色 | `<border>` | 主题边框色 | `<border>…</border>` |
-| 修饰符 | `<b>` | 加粗 | `<b>DISCOVER</b>` |
-| 修饰符 | `<i>` | 斜体 | `<i>…</i>` |
-| 修饰符 | `<dim>` | 弱化 | `<dim>…</dim>` |
-| 字面颜色 | `<#rrggbb>` | 十六进制颜色 | `<#ff5500>…</#ff5500>` |
-| 字面颜色 | `<任意颜色名>` | ratatui 支持的颜色名（如 `red`、`blue`） | `<red>…</red>` |
-| 渐变色 | `<gradient:preset>…</gradient>` | 逐字符渐变 | `<gradient:rainbow>…</gradient>` |
-| 渐变色 | `<grad:preset>…</grad>` | 逐字符渐变（简写） | `<grad:turbo>…</grad>` |
+| 类型     | 标签                            | 含义                                     | 写法示例                         |
+| -------- | ------------------------------- | ---------------------------------------- | -------------------------------- |
+| 主题色   | `<accent>`                      | 主题强调色                               | `<accent>►</accent>`             |
+| 主题色   | `<text>`                        | 主题正文色                               | `<text>…</text>`                 |
+| 主题色   | `<muted>`                       | 主题弱化色                               | `<muted>…</muted>`               |
+| 主题色   | `<error>`                       | 主题错误色                               | `<error>…</error>`               |
+| 主题色   | `<bg>`                          | 主题背景色                               | `<bg>…</bg>`                     |
+| 主题色   | `<surface>`                     | 主题面板色                               | `<surface>…</surface>`           |
+| 主题色   | `<border>`                      | 主题边框色                               | `<border>…</border>`             |
+| 修饰符   | `<b>`                           | 加粗                                     | `<b>DISCOVER</b>`                |
+| 修饰符   | `<i>`                           | 斜体                                     | `<i>…</i>`                       |
+| 修饰符   | `<dim>`                         | 弱化                                     | `<dim>…</dim>`                   |
+| 字面颜色 | `<#rrggbb>`                     | 十六进制颜色                             | `<#ff5500>…</#ff5500>`           |
+| 字面颜色 | `<任意颜色名>`                  | ratatui 支持的颜色名（如 `red`、`blue`） | `<red>…</red>`                   |
+| 渐变色   | `<gradient:preset>…</gradient>` | 逐字符渐变                               | `<gradient:rainbow>…</gradient>` |
+| 渐变色   | `<grad:preset>…</grad>`         | 逐字符渐变（简写）                       | `<grad:turbo>…</grad>`           |
 
 渐变预设：`warm`、`cubehelix`、`rainbow`、`turbo`、`spectral`、`viridis`。
 
@@ -612,16 +605,15 @@ are styled by the active theme:
 
 **支持标记语法的内容**
 
-| 内容 | 配置项 | 位置 |
-| --- | --- | --- |
-| 表格列标题 | `[columns]` 或 `[columns.overrides]` 中的 `header` | content 表格 |
-| 导航区块标题 | `[[navigation.sections]]` 的 `title` | 侧边导航 |
-| 导航项名称 | `[[navigation.sections.items]]` 的 `name` | 侧边导航 |
-| 面包屑 | 沿用导航配置的 section `title` / item `name`，无独立配置项 | 顶部面包屑 |
-| Block 标题 | `title_template`（含 `{name}` `{count}` `{total}` 占位符，先替换再解析标记） | 内容区、队列、歌词页、帮助、命令面板等 |
+| 内容         | 配置项                                                                       | 位置                                   |
+| ------------ | ---------------------------------------------------------------------------- | -------------------------------------- |
+| 表格列标题   | `[columns]` 或 `[columns.overrides]` 中的 `header`                           | content 表格                           |
+| 导航区块标题 | `[[navigation.sections]]` 的 `title`                                         | 侧边导航                               |
+| 导航项名称   | `[[navigation.sections.items]]` 的 `name`                                    | 侧边导航                               |
+| 面包屑       | 沿用导航配置的 section `title` / item `name`，无独立配置项                   | 顶部面包屑                             |
+| Block 标题   | `title_template`（含 `{name}` `{count}` `{total}` 占位符，先替换再解析标记） | 内容区、队列、歌词页、帮助、命令面板等 |
 
 > 表格**行内容**（歌曲名、歌手等单元格）暂不支持标记语法，按纯文本渲染。
-
 
 Example (the default):
 
