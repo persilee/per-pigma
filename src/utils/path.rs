@@ -21,7 +21,20 @@ pub fn pigma_cache_dir() -> PathBuf {
 }
 
 /// pigma config root directory.
+///
+/// Resolution order:
+/// 1. `$XDG_CONFIG_HOME/pigma` if `XDG_CONFIG_HOME` is set;
+/// 2. `~/.config/pigma` if it already exists (XDG-style layout);
+/// 3. platform default (e.g. `~/Library/Application Support/pigma` on macOS).
 pub fn pigma_config_dir() -> PathBuf {
+    if let Some(xdg) = std::env::var_os("XDG_CONFIG_HOME") {
+        return PathBuf::from(xdg).join("pigma");
+    }
+    let home = home_dir().unwrap_or_else(|| PathBuf::from("."));
+    let xdg_default = home.join(".config").join("pigma");
+    if xdg_default.exists() {
+        return xdg_default;
+    }
     dirs::config_dir()
         .unwrap_or_else(|| PathBuf::from("."))
         .join("pigma")

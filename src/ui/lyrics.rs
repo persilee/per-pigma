@@ -137,6 +137,15 @@ pub(super) fn draw(
         }
     }
 
+    // 有足够空间时整块歌词垂直居中：渲染行数不足可视高度时，在顶部补空行
+    let top_pad = (inner.height as usize).saturating_sub(lines.len()) / 2;
+    if top_pad > 0 {
+        let mut padded = Vec::with_capacity(top_pad + lines.len());
+        padded.extend(std::iter::repeat_with(Line::default).take(top_pad));
+        padded.extend(lines);
+        lines = padded;
+    }
+
     f.render_widget(Paragraph::new(lines), inner);
 }
 
